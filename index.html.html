@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAYA SUKA NOMBOR PIAWAI - Permainan Matematik Tingkatan 3</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- MediaPipe Hands & Camera Utils for Hand Gesture Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#2563eb',
+                            darkblue: '#1e40af',
+                            purple: '#7c3aed',
+                            yellow: '#f59e0b',
+                            lightBg: '#f8fafc'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #7c3aed 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.25);
+        }
+
+        .pulse-timer {
+            animation: pulse-red 1s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { color: #ef4444; transform: scale(1); }
+            50% { color: #dc2626; transform: scale(1.08); }
+        }
+
+        .badge-glow {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col justify-between min-h-screen p-2 sm:p-4 md:p-6">
+
+    <header class="max-w-5xl mx-auto w-full text-center mb-3 sm:mb-5">
+        <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-white text-xs sm:text-sm font-bold tracking-wide shadow-sm border border-white/30 mb-2">
+            <i class="fa-solid fa-graduation-cap text-yellow-300"></i> MATEMATIK TINGKATAN 3 • BAB 2: BENTUK PIAWAI
+        </div>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-md">
+            SAYA SUKA NOMBOR PIAWAI
+        </h1>
+        <p class="text-blue-100 text-xs sm:text-sm font-medium mt-1">Permainan Ulang Kaji Matematik Tingkatan 3 - Bab 2: Bentuk Piawai</p>
+    </header>
+
+    <main class="max-w-5xl mx-auto w-full flex-grow flex items-center justify-center">
+
+        <!-- 1. HOME SCREEN -->
+        <div id="homeScreen" class="glass-card rounded-3xl p-6 sm:p-10 w-full text-center transition-all duration-300">
+            <div class="mb-5 inline-block p-4 bg-blue-100 rounded-full text-brand-blue text-4xl sm:text-5xl shadow-inner">
+                <i class="fa-solid fa-calculator"></i>
+            </div>
+            
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-2">Permainan Ulang Kaji Interaktif</h2>
+            <p class="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto mb-6">
+                Uji kefahaman anda dalam tajuk Angka Bererti, Penukaran Bentuk Piawai, dan Operasi Aritmetik Bentuk Piawai melalui 16 soalan mencabar!
+            </p>
+
+            <!-- Mode Selection Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto mb-8">
+                <!-- Normal Mode -->
+                <div id="modeNormalCard" onclick="selectMode('normal')" class="cursor-pointer border-2 border-brand-blue bg-blue-50/80 p-5 rounded-2xl text-left transition-all hover:shadow-md flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute top-3 right-3 text-brand-blue text-xl" id="normalCheck">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fa-solid fa-mouse text-2xl text-brand-blue"></i>
+                            <h3 class="font-bold text-lg text-slate-800">Mod Kuiz Biasa</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">Pilih jawapan secara manual dengan menekan butang A, B, C, atau D pada skrin. Berfungsi 100% secara offline.</p>
+                    </div>
+                </div>
+
+                <!-- Gesture Mode -->
+                <div id="modeGestureCard" onclick="selectMode('gesture')" class="cursor-pointer border-2 border-slate-200 bg-white p-5 rounded-2xl text-left transition-all hover:shadow-md flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute top-3 right-3 text-slate-300 text-xl" id="gestureCheck">
+                        <i class="fa-regular fa-circle"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <i class="fa-solid fa-hand text-2xl text-brand-purple"></i>
+                            <h3 class="font-bold text-lg text-slate-800">Mod Hand Gesture</h3>
+                        </div>
+                        <p class="text-sm text-slate-600">Gunakan kamera untuk mengesan isyarat jari! (1 Jari = A, 2 = B, 3 = C, 4 = D).</p>
+                    </div>
+                    <span class="text-xs text-brand-purple font-semibold mt-2 block"><i class="fa-solid fa-wifi"></i> Memerlukan Akses Webcam & Internet CDN</span>
+                </div>
+            </div>
+
+            <!-- Rules & Info Box -->
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 max-w-2xl mx-auto mb-8 text-left text-xs sm:text-sm text-amber-900 flex items-start gap-3">
+                <i class="fa-solid fa-lightbulb text-amber-500 text-xl mt-0.5 flex-shrink-0"></i>
+                <div>
+                    <span class="font-bold block mb-1 text-amber-950">Panduan Masa & Pemarkahan:</span>
+                    Setiap soalan diberi pemasa <strong>20 saat</strong>. Markah penuh ialah <strong>16 markah</strong> (1 markah setiap soalan). Anda juga boleh menjawab secara manual bila-bila masa.
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-brand-blue to-brand-purple text-white font-black text-xl rounded-2xl shadow-xl hover:brightness-110 active:scale-95 transition-all">
+                MULA PERMAINAN <i class="fa-solid fa-play ml-2"></i>
+            </button>
+        </div>
+
+        <!-- 2. QUIZ SCREEN -->
+        <div id="quizScreen" class="glass-card rounded-3xl p-4 sm:p-8 w-full hidden flex-col transition-all duration-300">
+            <!-- Top Bar: Question Count, Timer, Score -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-200">
+                <div class="flex items-center gap-2">
+                    <span class="bg-blue-100 text-brand-blue font-extrabold px-3.5 py-1.5 rounded-xl text-sm sm:text-base border border-blue-200">
+                        Soalan <span id="currentQNum">1</span> daripada 16
+                    </span>
+                </div>
+
+                <!-- Timer Box -->
+                <div class="flex items-center gap-2 bg-slate-100 px-4 py-1.5 rounded-full font-black text-xl sm:text-2xl text-slate-700 shadow-inner" id="timerBox">
+                    <i class="fa-regular fa-clock text-brand-blue"></i>
+                    <span id="timerDisplay">20</span>s
+                </div>
+
+                <!-- Score Box -->
+                <div class="flex items-center gap-2 bg-amber-100 text-amber-900 font-extrabold px-3.5 py-1.5 rounded-xl text-sm sm:text-base border border-amber-200">
+                    <i class="fa-solid fa-trophy text-amber-500"></i> Markah: <span id="currentScore">0</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden mb-6">
+                <div id="progressBar" class="bg-gradient-to-r from-brand-blue to-brand-purple h-full transition-all duration-300" style="width: 6.25%;"></div>
+            </div>
+
+            <!-- Gesture / Camera View Container -->
+            <div id="gestureContainer" class="hidden mb-6 bg-slate-900 rounded-2xl p-3 sm:p-4 text-white flex flex-col md:flex-row items-center gap-4 relative overflow-hidden border border-slate-700">
+                <div class="relative w-44 h-32 bg-black rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-slate-700">
+                    <video id="webcam" class="absolute inset-0 w-full h-full object-cover transform -scale-x-100" autoplay playsinline muted></video>
+                    <canvas id="outputCanvas" class="absolute inset-0 w-full h-full object-cover transform -scale-x-100"></canvas>
+                    <div id="camFallback" class="hidden text-xs text-center text-slate-400 p-2">
+                        <i class="fa-solid fa-video-slash text-xl mb-1 text-red-400 block"></i>
+                        Kamera Tidak Aktif
+                    </div>
+                </div>
+
+                <div class="flex-grow text-center md:text-left space-y-1">
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                        <span id="camStatus" class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                            <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Memuatkan Kamera...
+                        </span>
+                        <span class="text-xs text-slate-400">| Tunjukkan tangan di hadapan kamera</span>
+                    </div>
+
+                    <div class="text-sm">
+                        Jari Dikesan: <span id="detectedFingersText" class="text-2xl font-black text-yellow-400">0</span>
+                        <span id="mappedOptionText" class="ml-2 font-bold text-slate-300">(Tunjukkan 1-4 Jari)</span>
+                    </div>
+
+                    <p class="text-xs text-slate-400">1 Jari = A | 2 Jari = B | 3 Jari = C | 4 Jari = D</p>
+                </div>
+
+                <div class="flex flex-col gap-2 w-full md:w-auto">
+                    <button id="lockAnswerBtn" onclick="confirmGestureAnswer()" disabled class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md">
+                        <i class="fa-solid fa-lock"></i> KUNCI JAWAPAN
+                    </button>
+                    <button onclick="toggleCamera()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg transition-all border border-slate-700">
+                        <i class="fa-solid fa-power-off mr-1"></i> Hidup/Matikan Kamera
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="mb-6 bg-slate-50 border border-slate-200 p-5 sm:p-7 rounded-2xl shadow-sm">
+                <span class="text-xs font-bold tracking-wider text-brand-blue uppercase mb-1 block">SOALAN MATEMATIK</span>
+                <h3 id="questionText" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 leading-relaxed">
+                    -- Teks Soalan Dipaparkan Di Sini --
+                </h3>
+            </div>
+
+            <!-- Options Grid -->
+            <div id="optionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
+                <!-- Dynamically populated buttons -->
+            </div>
+
+            <!-- Feedback Container -->
+            <div id="feedbackContainer" class="hidden mb-6 p-4 sm:p-5 rounded-2xl border transition-all">
+                <div class="flex items-center gap-3 mb-2">
+                    <div id="feedbackIcon" class="text-2xl"></div>
+                    <h4 id="feedbackTitle" class="text-lg font-black"></h4>
+                </div>
+                <div id="feedbackWork" class="text-sm sm:text-base text-slate-700 bg-white/70 p-3.5 rounded-xl border border-black/5 mt-2 font-medium">
+                    <!-- Working steps display -->
+                </div>
+            </div>
+
+            <!-- Next Question Navigation Button -->
+            <div class="flex justify-end mt-auto">
+                <button id="nextBtn" onclick="nextQuestion()" class="hidden px-8 py-3.5 bg-brand-blue hover:bg-brand-darkblue text-white font-extrabold text-lg rounded-2xl shadow-lg transition-all items-center gap-2">
+                    SOALAN SETERUSNYA <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. RESULTS SCREEN -->
+        <div id="resultScreen" class="glass-card rounded-3xl p-6 sm:p-10 w-full hidden text-center transition-all duration-300">
+            <div id="resultBadge" class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-3xl text-white shadow-lg bg-emerald-500 badge-glow">
+                <i class="fa-solid fa-award"></i>
+            </div>
+
+            <h2 class="text-3xl sm:text-4xl font-black text-slate-800 mb-1">KEPUTUSAN PERMAINAN</h2>
+            <p id="encouragementMsg" class="text-slate-600 font-semibold text-base sm:text-lg max-w-xl mx-auto mb-6">
+                -- Mesej Galakan --
+            </p>
+
+            <!-- Results Metrics Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8">
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
+                    <span class="text-xs font-bold text-slate-500 uppercase block mb-1">JUMLAH MARKAH</span>
+                    <span id="finalScore" class="text-3xl font-black text-brand-blue">0/16</span>
+                </div>
+                <div class="bg-purple-50 border border-purple-200 p-4 rounded-2xl">
+                    <span class="text-xs font-bold text-slate-500 uppercase block mb-1">PERATUSAN</span>
+                    <span id="finalPercentage" class="text-3xl font-black text-brand-purple">0%</span>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl">
+                    <span class="text-xs font-bold text-slate-500 uppercase block mb-1">JAWAPAN BETUL</span>
+                    <span id="correctCount" class="text-3xl font-black text-emerald-600">0</span>
+                </div>
+                <div class="bg-red-50 border border-red-200 p-4 rounded-2xl">
+                    <span class="text-xs font-bold text-slate-500 uppercase block mb-1">SALAH / MASA TAMAT</span>
+                    <span id="wrongCount" class="text-3xl font-black text-red-500">0</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button onclick="restartGame()" class="w-full sm:w-auto px-8 py-3.5 bg-brand-blue hover:bg-brand-darkblue text-white font-extrabold text-lg rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> MAIN SEMULA
+                </button>
+                <button onclick="showReviewScreen()" class="w-full sm:w-auto px-8 py-3.5 bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-lg rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> LIHAT SEMAKAN JAWAPAN
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. REVIEW SCREEN -->
+        <div id="reviewScreen" class="glass-card rounded-3xl p-6 sm:p-8 w-full hidden flex-col transition-all duration-300 max-h-[85vh]">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800">Semakan Jawapan Terperinci</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Semak kesemua 16 soalan, jawapan terpilih, skema jawapan dan jalan kerja lengkap.</p>
+                </div>
+                <button onclick="backToResults()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-sm rounded-xl transition-all">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+                </button>
+            </div>
+
+            <!-- Review Cards List -->
+            <div id="reviewList" class="overflow-y-auto space-y-4 pr-2 flex-grow">
+                <!-- Dynamically populated review items -->
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-4 text-center text-white/80 text-xs sm:text-sm font-medium">
+        Modul Interaktif Matematik Tingkatan 3 • Bab 2: Bentuk Piawai
+    </footer>
+
+    <script>
+        // 16 SOALAN KUIZ LENGKAP
+        const quizQuestions = [
+            {
+                id: 1,
+                question: "Bundarkan 2.345 kepada 3 angka bererti.",
+                options: { A: "2.34", B: "2.35", C: "2.340", D: "2.350" },
+                correct: "B",
+                explanation: "Angka keempat ialah 5. Oleh itu, angka ketiga dibundarkan naik. Jawapannya ialah 2.35."
+            },
+            {
+                id: 2,
+                question: "Hitung (2.3 − 0.4328) ÷ 25 dan bundarkan jawapan kepada 3 angka bererti.",
+                options: { A: "0.075", B: "0.0747", C: "0.0746", D: "0.074" },
+                correct: "B",
+                explanation: "(2.3 − 0.4328) ÷ 25 = 0.074688. Dibundarkan kepada 3 angka bererti, jawapannya ialah 0.0747."
+            },
+            {
+                id: 3,
+                question: "Ungkapkan 2.91 × 10⁻⁴ sebagai satu nombor tunggal.",
+                options: { A: "29100", B: "2910", C: "0.000291", D: "0.0000291" },
+                correct: "C",
+                explanation: "Kuasa −4 bermaksud titik perpuluhan digerakkan empat tempat ke kiri. Jawapannya ialah 0.000291."
+            },
+            {
+                id: 4,
+                question: "Ungkapkan 0.00000312 dalam bentuk piawai.",
+                options: { A: "3.12 × 10⁻⁶", B: "3.12 × 10⁻⁵", C: "3.12 × 10⁵", D: "3.12 × 10⁶" },
+                correct: "A",
+                explanation: "Bentuk piawai ialah a × 10ⁿ dengan 1 ≤ a < 10. Oleh itu, 0.00000312 = 3.12 × 10⁻⁶."
+            },
+            {
+                id: 5,
+                question: "Hitung 0.00284 ÷ (2 × 10⁻²)².",
+                options: { A: "0.0071", B: "0.071", C: "7.1", D: "71" },
+                correct: "C",
+                explanation: "(2 × 10⁻²)² = 0.0004. Kemudian, 0.00284 ÷ 0.0004 = 7.1."
+            },
+            {
+                id: 6,
+                question: "Diberi a = 2 × 10⁴. Cari nilai 16a³ dalam bentuk piawai.",
+                options: { A: "1.28 × 10¹⁴", B: "1.28 × 10¹²", C: "6.4 × 10⁹", D: "3.2 × 10⁸" },
+                correct: "A",
+                explanation: "16(2 × 10⁴)³ = 16 × 8 × 10¹² = 1.28 × 10¹⁴."
+            },
+            {
+                id: 7,
+                question: "Selesaikan 0.0065 − 7.5 × 10⁻⁴. Berikan jawapan dalam bentuk piawai.",
+                options: { A: "5.75 × 10⁻⁴", B: "5.75 × 10⁻³", C: "7.49 × 10⁻⁴", D: "7.49 × 10⁻³" },
+                correct: "B",
+                explanation: "0.0065 − 0.00075 = 0.00575 = 5.75 × 10⁻³."
+            },
+            {
+                id: 8,
+                question: "Bundarkan 0.0856 kepada 2 angka bererti.",
+                options: { A: "0.08", B: "0.09", C: "0.085", D: "0.086" },
+                correct: "D",
+                explanation: "Dua angka bererti pertama ialah 8 dan 5. Angka seterusnya ialah 6, maka 5 dibundarkan naik menjadi 6. Jawapannya ialah 0.086."
+            },
+            {
+                id: 9,
+                question: "Hitung 0.0013 + 8 × 10⁻⁵. Berikan jawapan dalam bentuk piawai.",
+                options: { A: "1.38 × 10⁻²", B: "1.38 × 10⁻³", C: "1.38 × 10⁻⁴", D: "1.38 × 10⁻⁵" },
+                correct: "B",
+                explanation: "0.0013 + 0.00008 = 0.00138 = 1.38 × 10⁻³."
+            },
+            {
+                id: 10,
+                question: "Hitung (5.3 × 10⁸) ÷ (2.12 × 10⁻²). Berikan jawapan dalam bentuk piawai.",
+                options: { A: "2.5 × 10¹⁰", B: "7.42 × 10¹⁰", C: "2.5 × 10⁻¹⁰", D: "7.42 × 10⁻¹⁰" },
+                correct: "A",
+                explanation: "5.3 ÷ 2.12 = 2.5 dan 10⁸ ÷ 10⁻² = 10¹⁰. Jawapannya ialah 2.5 × 10¹⁰."
+            },
+            {
+                id: 11,
+                question: "Antara berikut, yang manakah bentuk piawai bagi 450000?",
+                options: { A: "45 × 10⁴", B: "4.5 × 10⁵", C: "0.45 × 10⁶", D: "450 × 10³" },
+                correct: "B",
+                explanation: "Pekali bentuk piawai mestilah sekurang-kurangnya 1 tetapi kurang daripada 10. Oleh itu, 450000 = 4.5 × 10⁵."
+            },
+            {
+                id: 12,
+                question: "Ungkapkan 6.25 × 10³ sebagai satu nombor tunggal.",
+                options: { A: "625", B: "6250", C: "62500", D: "0.00625" },
+                correct: "B",
+                explanation: "Gerakkan titik perpuluhan tiga tempat ke kanan. Jawapannya ialah 6250."
+            },
+            {
+                id: 13,
+                question: "Ungkapkan 7.8 × 10⁻³ sebagai satu nombor tunggal.",
+                options: { A: "0.078", B: "0.0078", C: "0.00078", D: "7800" },
+                correct: "B",
+                explanation: "Gerakkan titik perpuluhan tiga tempat ke kiri. Jawapannya ialah 0.0078."
+            },
+            {
+                id: 14,
+                question: "Hitung (3 × 10⁴)(2 × 10³).",
+                options: { A: "6 × 10⁷", B: "5 × 10⁷", C: "6 × 10¹²", D: "6 × 10¹" },
+                correct: "A",
+                explanation: "Darabkan pekali, 3 × 2 = 6, dan tambah indeks, 4 + 3 = 7. Jawapannya ialah 6 × 10⁷."
+            },
+            {
+                id: 15,
+                question: "Hitung (8 × 10⁶) ÷ (2 × 10²).",
+                options: { A: "4 × 10³", B: "4 × 10⁴", C: "6 × 10⁴", D: "4 × 10⁸" },
+                correct: "B",
+                explanation: "8 ÷ 2 = 4 dan 10⁶ ÷ 10² = 10⁴. Jawapannya ialah 4 × 10⁴."
+            },
+            {
+                id: 16,
+                question: "Hitung (3.2 × 10⁻³) + (4.5 × 10⁻³). Berikan jawapan dalam bentuk piawai.",
+                options: { A: "7.7 × 10⁻³", B: "7.7 × 10⁻⁶", C: "1.3 × 10⁻³", D: "7.7 × 10³" },
+                correct: "A",
+                explanation: "(3.2 + 4.5) × 10⁻³ = 7.7 × 10⁻³."
+            }
+        ];
+
+        // GAME STATE
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedGameMode = 'normal';
+        let userAnswers = [];
+        let timerInterval = null;
+        let timeLeft = 20;
+        let questionAnswered = false;
+
+        // CAMERA / HAND GESTURE VARIABLES
+        let cameraObj = null;
+        let handsObj = null;
+        let detectedFingerCount = 0;
+        let currentGestureOption = null;
+        let isCameraActive = false;
+
+        // MODE SELECTION HANDLER
+        function selectMode(mode) {
+            selectedGameMode = mode;
+            const normalCard = document.getElementById('modeNormalCard');
+            const gestureCard = document.getElementById('modeGestureCard');
+            const normalCheck = document.getElementById('normalCheck');
+            const gestureCheck = document.getElementById('gestureCheck');
+
+            if (mode === 'normal') {
+                normalCard.className = "cursor-pointer border-2 border-brand-blue bg-blue-50/80 p-5 rounded-2xl text-left transition-all hover:shadow-md flex flex-col justify-between relative overflow-hidden";
+                gestureCard.className = "cursor-pointer border-2 border-slate-200 bg-white p-5 rounded-2xl text-left transition-all hover:shadow-md flex flex-col justify-between relative overflow-hidden";
+                normalCheck.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+                normalCheck.className = "absolute top-3 right-3 text-brand-blue text-xl";
+                gestureCheck.innerHTML = `<i class="fa-regular fa-circle"></i>`;
+                gestureCheck.className = "absolute top-3 right-3 text-slate-300 text-xl";
+            } else {
+                gestureCard.className = "cursor-pointer border-2 border-brand-purple bg-purple-50/80 p-5 rounded-2xl text-left transition-all hover:shadow-md flex flex-col justify-between relative overflow-hidden";
+                normalCard.className = "cursor-pointer border-2 border-slate-200 bg-white p-5 rounded-2xl text-left transition-all hover:shadow-md flex flex-col justify-between relative overflow-hidden";
+                gestureCheck.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+                gestureCheck.className = "absolute top-3 right-3 text-brand-purple text-xl";
+                normalCheck.innerHTML = `<i class="fa-regular fa-circle"></i>`;
+                normalCheck.className = "absolute top-3 right-3 text-slate-300 text-xl";
+            }
+        }
+
+        // START GAME
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            document.getElementById('quizScreen').classList.add('flex');
+
+            if (selectedGameMode === 'gesture') {
+                document.getElementById('gestureContainer').classList.remove('hidden');
+                initCameraAndGesture();
+            } else {
+                document.getElementById('gestureContainer').classList.add('hidden');
+            }
+
+            loadQuestion();
+        }
+
+        // LOAD QUESTION
+        function loadQuestion() {
+            questionAnswered = false;
+            const q = quizQuestions[currentQuestionIndex];
+
+            document.getElementById('currentQNum').innerText = currentQuestionIndex + 1;
+            document.getElementById('currentScore').innerText = score;
+            document.getElementById('questionText').innerText = q.question;
+            
+            const progressPercent = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const keys = ['A', 'B', 'C', 'D'];
+            keys.forEach(key => {
+                const btn = document.createElement('button');
+                btn.id = `optBtn_${key}`;
+                btn.onclick = () => handleAnswer(key);
+                btn.className = `option-btn w-full p-4 sm:p-5 rounded-2xl border-2 border-slate-200 bg-white text-left font-bold text-slate-800 flex items-center gap-4 text-base sm:text-lg hover:border-brand-blue hover:bg-blue-50/50`;
+                btn.innerHTML = `
+                    <span class="w-10 h-10 rounded-xl bg-slate-100 text-brand-blue font-black flex items-center justify-center flex-shrink-0 text-lg border border-slate-200 shadow-sm">${key}</span>
+                    <span class="flex-grow">${q.options[key]}</span>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedbackContainer').classList.add('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+            document.getElementById('nextBtn').classList.remove('flex');
+
+            resetGestureHighlight();
+            startTimer();
+        }
+
+        // TIMER LOGIC
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 20;
+            const timerDisplay = document.getElementById('timerDisplay');
+            const timerBox = document.getElementById('timerBox');
+            
+            timerDisplay.innerText = timeLeft;
+            timerBox.classList.remove('pulse-timer', 'bg-red-100', 'text-red-600');
+            timerBox.classList.add('bg-slate-100', 'text-slate-700');
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+
+                if (timeLeft <= 5) {
+                    timerBox.classList.remove('bg-slate-100', 'text-slate-700');
+                    timerBox.classList.add('pulse-timer', 'bg-red-100', 'text-red-600');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleAnswer(null); // Timeout (unanswered)
+                }
+            }, 1000);
+        }
+
+        // HANDLE ANSWER SUBMISSION
+        function handleAnswer(selectedKey) {
+            if (questionAnswered) return;
+            questionAnswered = true;
+            clearInterval(timerInterval);
+
+            const q = quizQuestions[currentQuestionIndex];
+            const isCorrect = (selectedKey === q.correct);
+
+            userAnswers.push({
+                questionNumber: currentQuestionIndex + 1,
+                questionText: q.question,
+                options: q.options,
+                selectedOption: selectedKey,
+                correctOption: q.correct,
+                explanation: q.explanation,
+                isCorrect: isCorrect
+            });
+
+            if (isCorrect) {
+                score++;
+                document.getElementById('currentScore').innerText = score;
+            }
+
+            // Button highlights
+            const keys = ['A', 'B', 'C', 'D'];
+            keys.forEach(key => {
+                const btn = document.getElementById(`optBtn_${key}`);
+                btn.disabled = true;
+
+                if (key === q.correct) {
+                    btn.className = "w-full p-4 sm:p-5 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-left font-bold text-emerald-900 flex items-center gap-4 text-base sm:text-lg shadow-md";
+                } else if (key === selectedKey && !isCorrect) {
+                    btn.className = "w-full p-4 sm:p-5 rounded-2xl border-2 border-red-500 bg-red-50 text-left font-bold text-red-900 flex items-center gap-4 text-base sm:text-lg opacity-80";
+                } else {
+                    btn.className = "w-full p-4 sm:p-5 rounded-2xl border-2 border-slate-200 bg-white text-left font-bold text-slate-400 flex items-center gap-4 text-base sm:text-lg opacity-50";
+                }
+            });
+
+            // Feedback Card UI
+            const feedbackContainer = document.getElementById('feedbackContainer');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackWork = document.getElementById('feedbackWork');
+
+            feedbackContainer.classList.remove('hidden');
+
+            if (selectedKey === null) {
+                feedbackContainer.className = "mb-6 p-4 sm:p-5 rounded-2xl border bg-amber-50 border-amber-300 text-amber-900";
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-hourglass-end text-amber-500"></i>`;
+                feedbackTitle.innerText = "Masa Tamat!";
+            } else if (isCorrect) {
+                feedbackContainer.className = "mb-6 p-4 sm:p-5 rounded-2xl border bg-emerald-50 border-emerald-300 text-emerald-900";
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+                feedbackTitle.innerText = "TAHNIAH! JAWAPAN BETUL!";
+            } else {
+                feedbackContainer.className = "mb-6 p-4 sm:p-5 rounded-2xl border bg-red-50 border-red-300 text-red-900";
+                feedbackIcon.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-600"></i>`;
+                feedbackTitle.innerText = `JAWAPAN SALAH! (Jawapan Betul: ${q.correct})`;
+            }
+
+            feedbackWork.innerText = `Jalan Kerja / Penerangan: ${q.explanation}`;
+
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('flex');
+        }
+
+        // NEXT QUESTION
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizQuestions.length) {
+                loadQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // FINISH QUIZ & CALCULATION
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            if (isCameraActive && cameraObj) {
+                try { cameraObj.stop(); } catch(e){}
+            }
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const total = quizQuestions.length;
+            const percentage = Math.round((score / total) * 100);
+
+            document.getElementById('finalScore').innerText = `${score}/${total}`;
+            document.getElementById('finalPercentage').innerText = `${percentage}%`;
+
+            let correct = 0;
+            let wrong = 0;
+            userAnswers.forEach(ans => {
+                if (ans.isCorrect) correct++;
+                else wrong++;
+            });
+
+            document.getElementById('correctCount').innerText = correct;
+            document.getElementById('wrongCount').innerText = wrong;
+
+            const msgEl = document.getElementById('encouragementMsg');
+            const badgeEl = document.getElementById('resultBadge');
+
+            if (score >= 14) {
+                msgEl.innerText = "Hebat! Anda sangat menguasai Bentuk Piawai!";
+                badgeEl.className = "w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-3xl text-white shadow-lg bg-emerald-500 badge-glow";
+                badgeEl.innerHTML = `<i class="fa-solid fa-crown"></i>`;
+            } else if (score >= 11) {
+                msgEl.innerText = "Bagus! Teruskan berlatih!";
+                badgeEl.className = "w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-3xl text-white shadow-lg bg-blue-500 badge-glow";
+                badgeEl.innerHTML = `<i class="fa-solid fa-star"></i>`;
+            } else if (score >= 8) {
+                msgEl.innerText = "Usaha yang baik! Mari kukuhkan lagi pemahaman anda.";
+                badgeEl.className = "w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-3xl text-white shadow-lg bg-amber-500 badge-glow";
+                badgeEl.innerHTML = `<i class="fa-solid fa-thumbs-up"></i>`;
+            } else {
+                msgEl.innerText = "Jangan putus asa! Cuba lagi dan belajar daripada jawapan.";
+                badgeEl.className = "w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-3xl text-white shadow-lg bg-purple-500 badge-glow";
+                badgeEl.innerHTML = `<i class="fa-solid fa-book-open"></i>`;
+            }
+        }
+
+        // RESTART GAME
+        function restartGame() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('homeScreen').classList.remove('hidden');
+        }
+
+        // SHOW DETAILED ANSWERS REVIEW
+        function showReviewScreen() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('reviewScreen').classList.remove('hidden');
+            document.getElementById('reviewScreen').classList.add('flex');
+
+            const list = document.getElementById('reviewList');
+            list.innerHTML = '';
+
+            userAnswers.forEach((ans) => {
+                const item = document.createElement('div');
+                const isCorrect = ans.isCorrect;
+                
+                item.className = `p-4 sm:p-5 rounded-2xl border ${isCorrect ? 'bg-emerald-50/60 border-emerald-200' : 'bg-red-50/60 border-red-200'} text-left`;
+
+                let userAnsText = ans.selectedOption ? `${ans.selectedOption}. ${ans.options[ans.selectedOption]}` : "Tidak Dijawab (Masa Tamat)";
+                let correctAnsText = `${ans.correctOption}. ${ans.options[ans.correctOption]}`;
+
+                item.innerHTML = `
+                    <div class="flex items-start justify-between gap-3 mb-2">
+                        <span class="font-extrabold text-slate-900 text-sm sm:text-base">Soalan ${ans.questionNumber}: ${ans.questionText}</span>
+                        <span class="${isCorrect ? 'text-emerald-600' : 'text-red-500'} font-black text-xl flex-shrink-0">
+                            ${isCorrect ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-circle-xmark"></i>'}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm font-semibold mb-3">
+                        <div class="p-2.5 rounded-xl ${isCorrect ? 'bg-emerald-100/70 text-emerald-900' : 'bg-red-100/70 text-red-900'}">
+                            Jawapan Anda: <span class="font-bold">${userAnsText}</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-blue-100/70 text-blue-900">
+                            Jawapan Betul: <span class="font-bold">${correctAnsText}</span>
+                        </div>
+                    </div>
+
+                    <div class="text-xs sm:text-sm text-slate-700 bg-white/80 p-3 rounded-xl border border-slate-200">
+                        <span class="font-bold text-slate-900 block mb-0.5">Jalan Kerja:</span>
+                        ${ans.explanation}
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function backToResults() {
+            document.getElementById('reviewScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+        }
+
+        // MEDIAPIPE GESTURE DETECTION
+        function initCameraAndGesture() {
+            const videoElement = document.getElementById('webcam');
+            const canvasElement = document.getElementById('outputCanvas');
+            const canvasCtx = canvasElement.getContext('2d');
+            const statusEl = document.getElementById('camStatus');
+            const fallback = document.getElementById('camFallback');
+
+            if (typeof Hands === 'undefined') {
+                statusEl.innerHTML = `<span class="text-red-400">Ralat CDN: Pustaka MediaPipe gagal dimuatkan. Gunakan butang pilihan manual.</span>`;
+                fallback.classList.remove('hidden');
+                return;
+            }
+
+            handsObj = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+
+            handsObj.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.6,
+                minTrackingConfidence: 0.6
+            });
+
+            handsObj.onResults((results) => {
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    const landmarks = results.multiHandLandmarks[0];
+                    drawLandmarks(canvasCtx, landmarks);
+                    
+                    detectedFingerCount = countFingers(landmarks);
+                    updateGestureUI(detectedFingerCount);
+                } else {
+                    detectedFingerCount = 0;
+                    updateGestureUI(0);
+                }
+                canvasCtx.restore();
+            });
+
+            cameraObj = new Camera(videoElement, {
+                onFrame: async () => {
+                    if (isCameraActive) {
+                        await handsObj.send({ image: videoElement });
+                    }
+                },
+                width: 320,
+                height: 240
+            });
+
+            cameraObj.start().then(() => {
+                isCameraActive = true;
+                statusEl.className = "inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Kamera Aktif`;
+                fallback.classList.add('hidden');
+            }).catch((err) => {
+                console.error("Camera access error:", err);
+                statusEl.className = "inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30";
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400"></span> Kamera Tidak Dikesan / Tiada Kebenaran`;
+                fallback.classList.remove('hidden');
+            });
+        }
+
+        function drawLandmarks(ctx, landmarks) {
+            ctx.fillStyle = '#f59e0b';
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+
+            for (let point of landmarks) {
+                const x = point.x * ctx.canvas.width;
+                const y = point.y * ctx.canvas.height;
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        // Count raised fingers (Index, Middle, Ring, Pinky)
+        function countFingers(landmarks) {
+            let count = 0;
+            if (landmarks[8].y < landmarks[6].y) count++;   // Index
+            if (landmarks[12].y < landmarks[10].y) count++; // Middle
+            if (landmarks[16].y < landmarks[14].y) count++; // Ring
+            if (landmarks[20].y < landmarks[18].y) count++; // Pinky
+            return count;
+        }
+
+        function updateGestureUI(count) {
+            document.getElementById('detectedFingersText').innerText = count;
+            const mappedText = document.getElementById('mappedOptionText');
+            const lockBtn = document.getElementById('lockAnswerBtn');
+
+            resetGestureHighlight();
+
+            if (questionAnswered) {
+                lockBtn.disabled = true;
+                return;
+            }
+
+            if (count >= 1 && count <= 4) {
+                const options = { 1: 'A', 2: 'B', 3: 'C', 4: 'D' };
+                currentGestureOption = options[count];
+                mappedText.innerText = `-> Pilihan ${currentGestureOption}`;
+                mappedText.className = "ml-2 font-bold text-yellow-400";
+                
+                const optBtn = document.getElementById(`optBtn_${currentGestureOption}`);
+                if (optBtn) {
+                    optBtn.classList.add('ring-4', 'ring-yellow-400', 'bg-yellow-50');
+                }
+                
+                lockBtn.disabled = false;
+            } else {
+                currentGestureOption = null;
+                mappedText.innerText = "(Tunjukkan 1-4 Jari)";
+                mappedText.className = "ml-2 font-bold text-slate-400";
+                lockBtn.disabled = true;
+            }
+        }
+
+        function resetGestureHighlight() {
+            ['A', 'B', 'C', 'D'].forEach(key => {
+                const btn = document.getElementById(`optBtn_${key}`);
+                if (btn && !questionAnswered) {
+                    btn.classList.remove('ring-4', 'ring-yellow-400', 'bg-yellow-50');
+                }
+            });
+        }
+
+        function confirmGestureAnswer() {
+            if (currentGestureOption && !questionAnswered) {
+                handleAnswer(currentGestureOption);
+            }
+        }
+
+        function toggleCamera() {
+            const statusEl = document.getElementById('camStatus');
+
+            if (isCameraActive) {
+                if (cameraObj) cameraObj.stop();
+                isCameraActive = false;
+                statusEl.className = "inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300";
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-500"></span> Kamera Dimatikan`;
+            } else {
+                if (cameraObj) {
+                    cameraObj.start();
+                    isCameraActive = true;
+                    statusEl.className = "inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                    statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Kamera Aktif`;
+                } else {
+                    initCameraAndGesture();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
